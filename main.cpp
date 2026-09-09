@@ -62,7 +62,7 @@ int main(int argc, char ** argv, char ** env)
             std::ofstream f{filepath};
             for(auto s = size;s--;)
             {
-                f << '\0';
+                f << i;
             }
         }
         return 0;
