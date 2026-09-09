@@ -2,10 +2,8 @@
 #include<getopt.h>
 #include"EncFile.hpp"
 #include<Application.h>
-class MEncryptor : public BApplication 
-{
-	MEncryptor(void) : BApplication("MENcryptorAPP") {}
-};
+#include<Window.h>
+
 
 static struct option long_options[] =
 {
@@ -15,6 +13,7 @@ static struct option long_options[] =
     {"shred", 0, NULL, 's'},
     //{"init_new", required_argument, NULL, 'n'},
     {"help", 0, NULL, 'h'},
+    {"gui", 0, NULL, 'g'},
     {NULL, 0, NULL, 0}
 };
 void help(void)
@@ -26,6 +25,30 @@ void help(void)
     std::cout << R"(/a.out --key "Hello World" --iv "123" -f SuperText.txt)" << std::endl;;
     std::cout << R"(./a.out --key "Hello World" --iv "123" -f SuperText.txt.enc)" << std::endl;;
 }
+class MEncryptorApp : public BApplication 
+{
+	protected:
+		BWindow * m_window;
+		BRect * m_mainRect;
+	public:
+	MEncryptorApp(void) : BApplication("application/x-vnd.MENcryptorAPP") {
+		m_mainRect = new BRect(0,0, 256, 256);
+		m_window = new BWindow(*m_mainRect, 
+				"MEncryptorAPP",
+				B_DOCUMENT_WINDOW_LOOK,
+				B_NORMAL_WINDOW_FEEL,
+				0
+				);
+		m_window->Show();
+	}
+};
+int launch_gui(void)
+{
+	auto app = new MEncryptorApp{};
+	app -> Run();
+	delete app;
+	return 0;
+}
 
 int main(int argc, char ** argv, char ** env)
 {
@@ -33,13 +56,16 @@ int main(int argc, char ** argv, char ** env)
     std::string key, iv, filepath;
     //bool init_new;
     bool shred_file = false;
-    while ((ch = getopt_long(argc, argv, "k:v:f:n:hs", long_options, NULL)) != -1)
+    while ((ch = getopt_long(argc, argv, "gk:v:f:n:hs", long_options, NULL)) != -1)
     {
         switch (ch)
         {
             case 's':
                 shred_file = true;
                 break;
+	    case 'g':
+		return launch_gui();
+		break;
             case 'k':
                 key = optarg;
                 break;
