@@ -1,6 +1,11 @@
 #include<iostream>
 #include<getopt.h>
 #include"EncFile.hpp"
+#include<Application.h>
+class MEncryptor : public BApplication 
+{
+	MEncryptor(void) : BApplication("MENcryptorAPP") {}
+};
 
 static struct option long_options[] =
 {

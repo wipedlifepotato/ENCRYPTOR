@@ -1,2 +1,2 @@
 all:
-	g++ ChaCha20.cpp main.cpp -std=c++20 -o MEncryptor
+	g++ ChaCha20.cpp main.cpp portable_endian.cpp -std=c++20 -o MEncryptor
