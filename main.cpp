@@ -9,6 +9,7 @@ class EncFile final{
  using mkeyT = std::vector<unsigned char>;
  protected:
     std::ofstream m_stream;
+    std::string m_raw;
     std::filesystem::path m_path;
     mkeyT m_key, m_iv;
     void set( const std::string & data, mkeyT & to )
@@ -25,12 +26,27 @@ class EncFile final{
             t.insert(t.end(), copy.begin(), copy.end());
     }
  public:
-    EncFile(const std::filesystem::path & path, bool initNew = false, size_t bytes = 0):m_path{path} //: m_stream{path}
+    EncFile(const std::filesystem::path & path, std::string key, std::string iv, bool initNew = false, size_t bytes = 0): m_path{path} //: m_stream{path}
     {
+        set_key(key);
+        set_iv(iv);
         if (std::filesystem::exists(path))
         {
-            if(initNew) throw std::runtime_error("This file is exists");
-            m_stream = std::ofstream{path,std::ios::binary};
+            if(initNew) {
+                std::filesystem::path encPath = path;encPath += ".enc";
+                m_stream = std::ofstream{encPath, std::ios::binary};
+            //throw std::runtime_error("This file is exists");
+                std::ifstream i{m_path, std::ios::binary};
+                i.seekg(0, std::ios::end);
+                std::string data(i.tellg(), '\0');
+                i.seekg(0, std::ios::beg);
+                i.read(data.data(), data.size());
+                m_raw = data;
+                m_stream << encrypt_chacha20(data);
+            } else {
+                m_raw = encdecrypt();
+                m_stream = std::ofstream{path,std::ios::binary};
+            }
         }
         else if(initNew) {
             m_stream = std::ofstream{path,std::ios::binary};
@@ -38,6 +54,7 @@ class EncFile final{
             {
                 m_stream << '\0';
             }
+            m_raw="";
         } else {
             throw std::runtime_error("You will create a new file or select exists");
         }
@@ -113,7 +130,7 @@ class EncFile final{
     {
 
     }
-    std::string decrypt(void)
+    std::string encdecrypt(void)
     {
         std::ifstream i{m_path, std::ios::binary};
         i.seekg(0, std::ios::end);
@@ -127,12 +144,10 @@ class EncFile final{
 
 int main(int argc, char ** argv, char ** env)
 {
-    srand(time(NULL));
-    CounterChaCha20 = rand();
+    //srand(time(NULL));
+    CounterChaCha20 = 33;//rand();
     // ^^^ TODO:
-    auto f = EncFile{"TestRaw.dat", false};
-    f.set_key("Hello World");
-    f.set_iv("Hello World");
-    f << "Test text";
-    std::cout << f.decrypt() << std::endl;
+    auto f = EncFile{argv[1], "Hello World", "12345678", true};
+    //f << "Test text";
+    std::cout << f.encdecrypt() << std::endl;
 }
