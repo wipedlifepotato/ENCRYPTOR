@@ -7,6 +7,7 @@ static struct option long_options[] =
     {"key", required_argument, NULL, 'k'},
     {"iv", required_argument, NULL, 'v'},
     {"file", required_argument, NULL, 'f'},
+    {"shred", 0, NULL, 's'},
     //{"init_new", required_argument, NULL, 'n'},
     {"help", 0, NULL, 'h'},
     {NULL, 0, NULL, 0}
@@ -25,11 +26,15 @@ int main(int argc, char ** argv, char ** env)
 {
     char ch;
     std::string key, iv, filepath;
-    bool init_new;
-    while ((ch = getopt_long(argc, argv, "k:v:f:n:h", long_options, NULL)) != -1)
+    //bool init_new;
+    bool shred_file = false;
+    while ((ch = getopt_long(argc, argv, "k:v:f:n:hs", long_options, NULL)) != -1)
     {
         switch (ch)
         {
+            case 's':
+                shred_file = true;
+                break;
             case 'k':
                 key = optarg;
                 break;
@@ -44,6 +49,23 @@ int main(int argc, char ** argv, char ** env)
                 help();
                 return 0;
         }
+    }
+    if (shred_file)
+    {
+        if(filepath.empty()) {
+            std::cerr << "Give a filepath for shred" << std::endl;
+            return 1;
+        }
+        auto size = std::filesystem::file_size(filepath);
+        for(unsigned char i=33;i--;)
+        {
+            std::ofstream f{filepath};
+            for(auto s = size;s--;)
+            {
+                f << '\0';
+            }
+        }
+        return 0;
     }
     if (filepath.empty() || key.empty() || iv.empty())
     {
