@@ -18,3 +18,10 @@ Also, after all manipulation you maybe want to shred file, you can do it with -s
 
 
 for a gui launch app with --gui option. This is experemental and can be fully rewrited in future.
+
+## Alternative
+```
+<uu2> openssl enc -chacha20 -salt -pbkdf2 -iter 100000 -in file -out file.enc
+<uu2> openssl enc -d -chacha20 -pbkdf2 -iter 100000 -in file.enc -out file.dec
+<uu2> Важно: параметры KDF (-pbkdf2, -iter, -salt) должны совпадать при шифровании и расшифровке, иначе расшифровка не удастся.
+```
